@@ -5,7 +5,7 @@
 #include <time.h>
 #include <exception>
 
-#include "ThreadPool/ThreadPool.h"
+#include "Threadpool/ThreadPool.h"
 #include "MergeSort.hpp"
 
 int min_elements;
