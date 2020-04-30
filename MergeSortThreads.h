@@ -5,6 +5,7 @@
 #include <regex>
 #include <fstream>
 #include <time.h>
+#include <exception>
 
 class TimeStamp {
   public:
@@ -12,8 +13,8 @@ class TimeStamp {
     time_t t;
 
     TimeStamp(std::string);
+    TimeStamp(std::string, time_t t);
 };
-
 
 class TimeStampArray{
   public:
@@ -22,3 +23,10 @@ class TimeStampArray{
     TimeStampArray(std::string path);
     ~TimeStampArray();
 };
+
+// MergeSort fucntions
+void MergeSort(TimeStampArray *TSA, int low, int high);
+void Merge(TimeStampArray *TSA, int low, int high, int mid);
+
+// Debug Functions
+void printTSA(TimeStampArray* TSA);
