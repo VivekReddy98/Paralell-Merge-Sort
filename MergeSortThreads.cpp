@@ -11,20 +11,36 @@
 int min_elements;
 int max_threads;
 
+ThreadPool *pool;
 // A function to split array into two parts.
-void MergeSort(TimeStampArray *TSA, int low, int high)
+int MergeSort(TimeStampArray *TSA, int low, int high)
 {
+  std::cout << low << ":" << high << std::endl;
 	int mid;
 	if (low < high)
 	{
-		mid=(low+high)/2;
 		// Split the data into two half.
-		MergeSort(TSA, low, mid);
-		MergeSort(TSA, mid+1, high);
+    mid=(low+high)/2;
+
+    if (high-low+1 >= min_elements){
+      std::vector<std::future<int>> results;
+
+  		results.emplace_back(pool->enqueue(std::bind(MergeSort, TSA, low, mid)));
+      results.emplace_back(pool->enqueue(std::bind(MergeSort, TSA, mid+1, high)));
+
+  		// MergeSort(TSA, mid+1, high);
+      for(auto && result: results)
+          std::cout << result.get() << ' ';
+    }
+    else{
+      MergeSort(TSA, low, mid);
+  		MergeSort(TSA, mid+1, high);
+    }
 
 		// Merge them to get sorted output.
 		Merge(TSA, low, high, mid);
 	}
+  return 1;
 }
 
 // A function to merge the two half into a sorted data.
@@ -94,23 +110,24 @@ int main (int argc, char **argv){
     }
 
     std::string file_path = argv[1];
-    min_elements = stoi(argv[2]);
-    max_threads = stoi(argv[3]);
+    min_elements = std::stoi(argv[2]);
+    max_threads = std::stoi(argv[3]);
 
     TimeStampArray* TSA = new TimeStampArray(file_path);
 
-    ThreadPool pool(max_threads);
+    pool = new ThreadPool(max_threads);
 
-     try
-     {
-       MergeSort(TSA, 0, TSA->Array.size()-1);
-     }
-     catch (std::runtime_error& e)
-     {
-       std::cout << "Runtime Error: " << e.what() << std::endl;
-     }
+    try
+    {
+     MergeSort(TSA, 0, TSA->Array.size()-1);
+    }
+    catch (std::runtime_error& e)
+    {
+     std::cout << "Runtime Error: " << e.what() << std::endl;
+    }
 
-    // printTSA(TSA);
+    printTSA(TSA);
 
     delete TSA;
+    delete pool;
 }

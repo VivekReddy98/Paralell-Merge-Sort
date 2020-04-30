@@ -8,7 +8,7 @@
 #include "MergeSort.hpp"
 
 // A function to split array into two parts.
-void MergeSort(TimeStampArray *TSA, int low, int high)
+int MergeSort(TimeStampArray *TSA, int low, int high)
 {
 	int mid;
 	if (low < high)
@@ -21,6 +21,7 @@ void MergeSort(TimeStampArray *TSA, int low, int high)
 		// Merge them to get sorted output.
 		Merge(TSA, low, high, mid);
 	}
+	return 1;
 }
 
 // A function to merge the two half into a sorted data.
