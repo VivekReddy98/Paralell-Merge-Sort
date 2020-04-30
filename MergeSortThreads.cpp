@@ -15,7 +15,7 @@ ThreadPool *pool;
 // A function to split array into two parts.
 int MergeSort(TimeStampArray *TSA, int low, int high)
 {
-  std::cout << low << ":" << high << std::endl;
+  // std::cout << low << ":" << high << std::endl;
 	int mid;
 	if (low < high)
 	{
