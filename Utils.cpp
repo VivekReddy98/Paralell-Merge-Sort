@@ -7,7 +7,7 @@
 #include <time.h>
 #include <exception>
 
-#include "MergeSortThreads.h"
+#include "MergeSort.hpp"
 
 TimeStamp::TimeStamp(std::string line){
     std::smatch match;

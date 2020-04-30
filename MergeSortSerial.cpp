@@ -5,11 +5,7 @@
 #include <time.h>
 #include <exception>
 
-#include "ThreadPool/ThreadPool.h"
 #include "MergeSort.hpp"
-
-int min_elements;
-int max_threads;
 
 // A function to split array into two parts.
 void MergeSort(TimeStampArray *TSA, int low, int high)
@@ -90,16 +86,14 @@ void Merge(TimeStampArray *TSA, int low, int high, int mid)
 
 int main (int argc, char **argv){
     if(argc != 2){
-       std::runtime_error("Usage Executable filepath min_elements max_threads");
+       std::runtime_error("Usage Executable filepath");
     }
 
     std::string file_path = argv[1];
-    min_elements = stoi(argv[2]);
-    max_threads = stoi(argv[3]);
 
     TimeStampArray* TSA = new TimeStampArray(file_path);
 
-    ThreadPool pool(max_threads);
+    // std::cout << TSA->Array.size() << std::endl;
 
      try
      {
@@ -110,7 +104,7 @@ int main (int argc, char **argv){
        std::cout << "Runtime Error: " << e.what() << std::endl;
      }
 
-    // printTSA(TSA);
+    printTSA(TSA);
 
     delete TSA;
 }

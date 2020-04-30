@@ -7,6 +7,7 @@
 #include <time.h>
 #include <exception>
 
+
 class TimeStamp {
   public:
     std::string content;
