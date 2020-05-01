@@ -3,17 +3,22 @@
 #include <regex>
 #include <fstream>
 #include <time.h>
+#include <functional>
 #include <exception>
+#include <atomic>
+#include <thread>
+#include <mutex>
 
-#include "Threadpool/ThreadPool.h"
 #include "MergeSort.hpp"
 
 int min_elements;
-int max_threads;
 
-ThreadPool *pool;
+std::mutex thread_creation_mutex;
+
+std::atomic<int> numFreeThreads(0);
+
 // A function to split array into two parts.
-int MergeSort(TimeStampArray *TSA, int low, int high)
+void MergeSort(TimeStampArray *TSA, int low, int high)
 {
   // std::cout << low << ":" << high << std::endl;
 	int mid;
@@ -22,16 +27,42 @@ int MergeSort(TimeStampArray *TSA, int low, int high)
 		// Split the data into two half.
     mid=(low+high)/2;
 
-    if (high-low+1 >= min_elements){
-      std::vector<std::future<int>> results;
+    if (high-low+1 >= min_elements || numFreeThreads.load() == 0){
 
-  		results.emplace_back(pool->enqueue(std::bind(MergeSort, TSA, low, mid)));
-      results.emplace_back(pool->enqueue(std::bind(MergeSort, TSA, mid+1, high)));
+				std::vector<std::thread> TPool;
 
-  		// MergeSort(TSA, mid+1, high);
-      for(auto && result: results)
-          std::cout << result.get() << ' ';
-    }
+				{ // Scope for the Critical Section
+				std::lock_guard<std::mutex> lock(thread_creation_mutex);
+					if (numFreeThreads.load() > 2){
+							std::thread t1(std::bind(MergeSort, TSA, low, mid));
+							std::thread t2(std::bind(MergeSort, TSA, mid+1, high));
+							TPool.push_back(std::move(t1));
+							TPool.push_back(std::move(t2));
+							numFreeThreads.fetch_sub(2);
+					}
+					else if (numFreeThreads.load() > 1){
+						  std::thread t1(std::bind(MergeSort, TSA, low, mid));
+							TPool.push_back(std::move(t1));
+							numFreeThreads.fetch_sub(1);
+					}
+			  }
+
+				if (TPool.size() == 1) MergeSort(TSA, mid+1, high);
+				else if (TPool.size() == 0){
+					MergeSort(TSA, low, mid);
+		  		MergeSort(TSA, mid+1, high);
+				}
+
+			// Iterate over the thread vector
+			for (std::thread& th : TPool)
+			{
+				// If thread Object is Joinable then Join that thread.
+				if (th.joinable())
+					th.join();
+				else
+					printf("Thread is not joinable, Dangling thread WARNING");
+			}
+		}
     else{
       MergeSort(TSA, low, mid);
   		MergeSort(TSA, mid+1, high);
@@ -40,7 +71,7 @@ int MergeSort(TimeStampArray *TSA, int low, int high)
 		// Merge them to get sorted output.
 		Merge(TSA, low, high, mid);
 	}
-  return 1;
+  // return 1;
 }
 
 // A function to merge the two half into a sorted data.
@@ -111,11 +142,11 @@ int main (int argc, char **argv){
 
     std::string file_path = argv[1];
     min_elements = std::stoi(argv[2]);
-    max_threads = std::stoi(argv[3]);
+    int max_threads = std::stoi(argv[3]);
 
     TimeStampArray* TSA = new TimeStampArray(file_path);
 
-    pool = new ThreadPool(max_threads);
+		numFreeThreads.fetch_add(max_threads);
 
     try
     {
@@ -129,5 +160,4 @@ int main (int argc, char **argv){
     printTSA(TSA);
 
     delete TSA;
-    delete pool;
 }

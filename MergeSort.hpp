@@ -26,7 +26,7 @@ class TimeStampArray{
 };
 
 // MergeSort fucntions
-int MergeSort(TimeStampArray *TSA, int low, int high);
+void MergeSort(TimeStampArray *TSA, int low, int high);
 void Merge(TimeStampArray *TSA, int low, int high, int mid);
 
 // Debug Functions
