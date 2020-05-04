@@ -15,8 +15,10 @@
 
 int min_elements;
 
+// Mutex Lock for Crtical Section
 std::mutex thread_creation_mutex;
 
+// Atomic Variable keeping track of number of free threads.
 std::atomic<int> numFreeThreads;
 
 // A function to split array into two parts.
@@ -29,6 +31,7 @@ void MergeSortThreads(TimeStampArray *TSA, int low, int high)
 		// Split the data into two half.
     mid=(low+high)/2;
 
+		// Check if number of elements in >= Min elements and if any free threads are present
     if (high-low+1 >= min_elements || numFreeThreads.load() == 0){
 
 				std::vector<std::thread> TPool;
@@ -73,7 +76,6 @@ void MergeSortThreads(TimeStampArray *TSA, int low, int high)
 		// Merge them to get sorted output.
 		MergeThreads(TSA, low, high, mid);
 	}
-  // return 1;
 }
 
 // A function to merge the two half into a sorted data.
@@ -147,6 +149,7 @@ int main (int argc, char **argv){
 
 		auto start = std::chrono::steady_clock::now();
 
+		// Find the TimeStampArray from the filepath
     TimeStampArray* TSA = new TimeStampArray(file_path);
 
 		auto end = std::chrono::steady_clock::now();
@@ -155,6 +158,7 @@ int main (int argc, char **argv){
 							<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
 							<< " ms" << std::endl;
 
+		// Set the atomic variable with max_threads value
 		numFreeThreads.store(max_threads);
 
 		start = std::chrono::steady_clock::now();
@@ -173,6 +177,7 @@ int main (int argc, char **argv){
 							<< " ms" << std::endl;
 
 #ifdef DEBUG
+		// Prints the TSA array
     printTSA(TSA);
 #endif
 
