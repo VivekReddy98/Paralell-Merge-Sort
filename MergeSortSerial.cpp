@@ -8,7 +8,7 @@
 #include "MergeSort.hpp"
 
 // A function to split array into two parts.
-int MergeSort(TimeStampArray *TSA, int low, int high)
+void MergeSort(TimeStampArray *TSA, int low, int high)
 {
 	int mid;
 	if (low < high)
@@ -21,7 +21,6 @@ int MergeSort(TimeStampArray *TSA, int low, int high)
 		// Merge them to get sorted output.
 		Merge(TSA, low, high, mid);
 	}
-	return 1;
 }
 
 // A function to merge the two half into a sorted data.
@@ -84,7 +83,6 @@ void Merge(TimeStampArray *TSA, int low, int high, int mid)
 
 }
 
-
 int main (int argc, char **argv){
     if(argc != 2){
        std::runtime_error("Usage Executable filepath");
@@ -92,20 +90,34 @@ int main (int argc, char **argv){
 
     std::string file_path = argv[1];
 
-    TimeStampArray* TSA = new TimeStampArray(file_path);
+		auto start = std::chrono::steady_clock::now();
 
-    // std::cout << TSA->Array.size() << std::endl;
+		TimeStampArray* TSA = new TimeStampArray(file_path);
 
-     try
-     {
-       MergeSort(TSA, 0, TSA->Array.size()-1);
-     }
-     catch (std::runtime_error& e)
-     {
-       std::cout << "Runtime Error: " << e.what() << std::endl;
-     }
+		auto end = std::chrono::steady_clock::now();
 
+		std::cout << "Time to Load Data : "
+							<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+							<< " ms" << std::endl;
+
+		start = std::chrono::steady_clock::now();
+    try
+    {
+     MergeSort(TSA, 0, TSA->Array.size()-1);
+    }
+    catch (std::runtime_error& e)
+    {
+     std::cout << "Runtime Error: " << e.what() << std::endl;
+    }
+		end = std::chrono::steady_clock::now();
+
+		std::cout << "Time to Sort Data : "
+							<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+							<< " ms" << std::endl;
+
+#ifdef DEBUG
     printTSA(TSA);
+#endif
 
     delete TSA;
 }

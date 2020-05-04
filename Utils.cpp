@@ -59,6 +59,14 @@ TimeStampArray::TimeStampArray(std::string path){
   in.close();
 }
 
+TimeStampArray::TimeStampArray(const TimeStampArray* TSA){
+
+    for (auto obj : TSA->Array){
+        this->Array.push_back(new TimeStamp(obj->content, obj->t));
+    }
+}
+
+
 TimeStampArray::~TimeStampArray(){
     for (auto obj : this->Array){
        delete obj;
